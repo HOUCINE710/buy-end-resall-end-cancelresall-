@@ -2,107 +2,280 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Buy / Resell NFT</title>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ultra NFT Marketplace</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 40px;
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
       display: flex;
       justify-content: center;
+      align-items: center;
+      margin: 0;
     }
+    
     .container {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 400px;
-    }
-    h2 {
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    input, button {
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
       width: 100%;
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      max-width: 450px;
+      position: relative;
+      overflow: hidden;
     }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #4CAF50, #45a049, #2196F3);
+      border-radius: 20px 20px 0 0;
+    }
+    
+    h2 {
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    input, button, select {
+      width: 100%;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 2px solid #e1e5e9;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+    
     button {
-      background: #4CAF50;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
       color: white;
       cursor: pointer;
+      border: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+    
     button:hover {
-      background: #45a049;
+      background: linear-gradient(135deg, #45a049, #3d8b40);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
     }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
     .message {
       margin-top: 20px;
       font-weight: bold;
       text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8f9fa;
     }
+    
+    .nft-display {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
     .nft-display img {
       max-width: 100%;
-      border-radius: 10px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      margin-top: 12px;
     }
+    
     .tabs {
       display: flex;
-      justify-content: space-around;
-      margin-bottom: 20px;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 4px;
     }
+    
     .tab-btn {
-      background: #ddd;
+      background: transparent;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 20px;
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 8px;
+      flex: 1;
+      margin: 0 2px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: #666;
     }
+    
     .tab-btn.active {
       background: #4CAF50;
       color: white;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
     }
-    .hidden { display: none; }
+    
+    .tab-btn:hover:not(.active) {
+      background: #e9ecef;
+      color: #333;
+    }
+    
+    .hidden { 
+      display: none; 
+    }
+    
     .toast {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #333;
+      top: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #333, #555);
       color: white;
-      padding: 15px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      z-index: 1000;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      max-width: 300px;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    #accountInfo {
+      background: #f8f9fa;
+      padding: 12px 16px;
       border-radius: 8px;
-      z-index: 999;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+      color: #666;
+    }
+    
+    #accountInfo.connected {
+      background: linear-gradient(135deg, #d4edda, #c3e6cb);
+      color: #155724;
+    }
+    
+    .connect-btn {
+      background: linear-gradient(135deg, #2196F3, #1976D2);
+      margin-bottom: 25px;
+    }
+    
+    .connect-btn:hover {
+      background: linear-gradient(135deg, #1976D2, #1565C0);
+    }
+    
+    select {
+      background: white;
+      cursor: pointer;
+    }
+    
+    #resellFields {
+      transition: all 0.3s ease;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      color: #555;
+      font-weight: 600;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Ultra NFT Marketplace</h2>
+  <h2>🚀 Ultra NFT Marketplace</h2>
 
   <div class="tabs">
     <button class="tab-btn active" onclick="showTab('buy')">🛒 Buy NFT</button>
-    <button class="tab-btn" onclick="showTab('resell')">📤 Resell NFT</button>
+    <button class="tab-btn" onclick="showTab('resell')">📤 Manage NFT</button>
   </div>
 
   <div id="accountInfo">🔌 Not connected</div>
-  <button onclick="loginWallet()">🔐 Connect Wallet</button>
+  <button class="connect-btn" onclick="loginWallet()">🔐 Connect Wallet</button>
 
   <!-- BUY TAB -->
   <div id="buyTab">
-    <input type="number" id="tokenId" placeholder="Token ID" required />
-    <input type="text" id="maxPrice" placeholder="Max Price (e.g. 4.00000000)" required />
-    <input type="text" id="receiver" placeholder="Receiver Account" required />
-    <button onclick="buyNFT()">🛒 Buy</button>
+    <div class="form-group">
+      <label class="label">Token ID</label>
+      <input type="number" id="tokenId" placeholder="Enter Token ID" required />
+    </div>
+    <div class="form-group">
+      <label class="label">Max Price (UOS)</label>
+      <input type="text" id="maxPrice" placeholder="e.g. 4.00000000" required />
+    </div>
+    <div class="form-group">
+      <label class="label">Receiver Account</label>
+      <input type="text" id="receiver" placeholder="Account to receive NFT" required />
+    </div>
+    <button onclick="buyNFT()">🛒 Buy NFT</button>
   </div>
 
   <!-- RESELL TAB -->
   <div id="resellTab" class="hidden">
-    <input type="number" id="resellTokenId" placeholder="Token ID to Resell" required />
-    <input type="text" id="resellPrice" placeholder="Resell Price (e.g. 4.00000000)" required />
-    <input type="number" id="promoterShare" placeholder="Promoter Share (250-1000)" required />
-    <input type="text" id="resellMemo" placeholder="Memo (optional)" />
-    <button onclick="resellNFT()">📤 Put for Sale</button>
+    <div class="form-group">
+      <label class="label">Action</label>
+      <select id="resellAction">
+        <option value="resell">📤 Resell NFT</option>
+        <option value="cancelresell">❌ Cancel Resell</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="label">Token ID</label>
+      <input type="number" id="resellTokenId" placeholder="Token ID to manage" required />
+    </div>
+    
+    <div id="resellFields">
+      <div class="form-group">
+        <label class="label">Resell Price (UOS)</label>
+        <input type="text" id="resellPrice" placeholder="e.g. 4.00000000" required />
+      </div>
+      <div class="form-group">
+        <label class="label">Promoter Share (250-1000)</label>
+        <input type="number" id="promoterShare" placeholder="Basis points (250-1000)" required />
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="label">Memo (Optional)</label>
+      <input type="text" id="resellMemo" placeholder="Transaction memo" />
+    </div>
+    
+    <button onclick="handleResellAction()">🚀 Execute Action</button>
   </div>
 
   <div id="message" class="message"></div>
@@ -110,6 +283,7 @@
 </div>
 
 <div id="customToast" class="toast hidden"></div>
+
 <script>
   let connectedAccount = null;
 
@@ -128,6 +302,21 @@
     }
   }
 
+  // Handle resell action dropdown change
+  document.getElementById("resellAction").addEventListener("change", function () {
+    const selected = this.value;
+    const resellFields = document.getElementById("resellFields");
+    const button = document.querySelector('#resellTab button');
+    
+    if (selected === "resell") {
+      resellFields.style.display = "block";
+      button.innerHTML = "📤 Put for Sale";
+    } else {
+      resellFields.style.display = "none";
+      button.innerHTML = "❌ Cancel Resell";
+    }
+  });
+
   function showCustomToast(id, html) {
     console.log("🔔 Showing toast:", html);
     const toast = document.getElementById(id);
@@ -142,7 +331,9 @@
       const response = await ultra.connect({ referralCode: 'ecd1f052-9d0d-4b84-8dd3-10a753d044b5' });
       console.log("✅ Wallet connected response:", response);
       connectedAccount = response.data.blockchainid;
-      document.getElementById("accountInfo").innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
+      const accountInfo = document.getElementById("accountInfo");
+      accountInfo.innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
+      accountInfo.classList.add('connected');
       showCustomToast("customToast", `<strong>🔐 Wallet Connected</strong><br>${connectedAccount}`);
     } catch (err) {
       console.error("❌ Wallet connection error:", err);
@@ -200,6 +391,8 @@
       const result = await ultra.signTransaction({ actions: [action] }, { blocksBehind: 3, expireSeconds: 30 });
       console.log("✅ Transaction submitted:", result);
       messageDiv.textContent = "✅ Transaction submitted!";
+      messageDiv.style.background = "#d4edda";
+      messageDiv.style.color = "#155724";
 
       const metaResponse = await fetch(`https://explorer.ultra.io/api/v1/token/${tokenId}`);
       const meta = await metaResponse.json();
@@ -215,10 +408,24 @@
         nftDiv.innerHTML = `<p>✅ NFT bought, but no metadata found.</p>`;
       }
 
+      showCustomToast("customToast", `<strong>🎉 Purchase Successful!</strong><br>Token ID: ${tokenId}`);
+
     } catch (error) {
       console.error("❌ NFT Purchase error:", error);
       messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
+      messageDiv.style.background = "#f8d7da";
+      messageDiv.style.color = "#721c24";
       nftDiv.innerHTML = "";
+      showCustomToast("customToast", `<strong>❌ Purchase Failed</strong><br>${error.message || "Transaction failed"}`);
+    }
+  }
+
+  async function handleResellAction() {
+    const action = document.getElementById("resellAction").value;
+    if (action === "resell") {
+      await resellNFT();
+    } else {
+      await cancelResellNFT();
     }
   }
 
@@ -269,13 +476,72 @@
       const result = await ultra.signTransaction({ actions: [action] }, { blocksBehind: 3, expireSeconds: 30 });
       console.log("✅ NFT listed for resale:", result);
       messageDiv.textContent = "✅ NFT listed for resale successfully!";
+      messageDiv.style.background = "#d4edda";
+      messageDiv.style.color = "#155724";
+      showCustomToast("customToast", `<strong>📤 Listed for Sale!</strong><br>Token ID: ${tokenId} at ${formattedPrice}`);
     } catch (error) {
       console.error("❌ Resell failed:", error);
       messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
+      messageDiv.style.background = "#f8d7da";
+      messageDiv.style.color = "#721c24";
+      showCustomToast("customToast", `<strong>❌ Resell Failed</strong><br>${error.message || "Transaction failed"}`);
     }
   }
 
-  // ✅ تحقق تلقائي عند تحميل الصفحة
+  async function cancelResellNFT() {
+    console.log("❌ Cancelling NFT resale...");
+    const tokenId = document.getElementById("resellTokenId").value.trim();
+    const memo = document.getElementById("resellMemo").value.trim() || "Cancel Resell";
+    const messageDiv = document.getElementById("message");
+
+    console.log("📥 Cancel Resale Inputs:", { tokenId, memo });
+
+    if (!window.ultra) {
+      console.warn("❌ Ultra Extension not detected.");
+      return showCustomToast("customToast", "❌ Ultra Extension not detected.");
+    }
+
+    if (!connectedAccount) {
+      console.warn("⚠️ Wallet not connected.");
+      return showCustomToast("customToast", "⚠️ Please connect your wallet.");
+    }
+
+    if (!tokenId) {
+      console.warn("⚠️ Token ID required.");
+      return showCustomToast("customToast", "⚠️ Token ID is required.");
+    }
+
+    const action = {
+      account: "eosio.nft.ft",
+      name: "cancelresell",
+      authorization: [{ actor: connectedAccount, permission: "active" }],
+      data: {
+        cancelresell: {
+          token_id: parseInt(tokenId),
+          memo: memo.substring(0, 255),
+        },
+      },
+    };
+
+    console.log("🚀 Cancel resell action object:", action);
+
+    try {
+      const result = await ultra.signTransaction({ actions: [action] }, { blocksBehind: 3, expireSeconds: 30 });
+      console.log("✅ NFT resell cancelled:", result);
+      messageDiv.textContent = "✅ Resell cancelled successfully!";
+      messageDiv.style.background = "#d4edda";
+      messageDiv.style.color = "#155724";
+      showCustomToast("customToast", `<strong>❌ Sale Cancelled!</strong><br>Token ID: ${tokenId}`);
+    } catch (error) {
+      console.error("❌ Cancel Resell failed:", error);
+      messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
+      messageDiv.style.background = "#f8d7da";
+      messageDiv.style.color = "#721c24";
+      showCustomToast("customToast", `<strong>❌ Cancel Failed</strong><br>${error.message || "Transaction failed"}`);
+    }
+  }
+
+  // Auto-connect wallet on page load if previously connected
   window.addEventListener('load', () => {
     console.log("🌐 Page loaded.");
     if (localStorage.getItem('eagerlyConnection')) {
@@ -286,7 +552,6 @@
     }
   });
 </script>
-
 
 </body>
 </html>
