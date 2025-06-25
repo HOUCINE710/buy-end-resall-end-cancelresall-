@@ -96,111 +96,73 @@
   <div id="customToast" class="toast hidden"></div>
 
   <script>
-    let connectedAccount = null;
+  async function buyNFT() {
+    const tokenId = document.getElementById("tokenId").value.trim();
+    const maxPriceRaw = document.getElementById("maxPrice").value.trim();
+    const receiver = document.getElementById("receiver").value.trim();
+    const messageDiv = document.getElementById("message");
+    const nftDiv = document.getElementById("nftDetails");
 
-    function showCustomToast(id, html) {
-      const toast = document.getElementById(id);
-      toast.innerHTML = html;
-      toast.classList.remove("hidden");
-      toast.classList.add("slide-in-left");
-      setTimeout(() => {
-        toast.classList.add("hidden");
-      }, 5000);
+    // Reset previous messages
+    messageDiv.textContent = "";
+    nftDiv.innerHTML = "";
+
+    if (!window.ultra) return showCustomToast("customToast", "❌ Ultra Extension not detected.");
+    if (!connectedAccount) return showCustomToast("customToast", "⚠️ Please connect your wallet.");
+
+    if (!tokenId || !maxPriceRaw || !receiver) {
+      messageDiv.textContent = "❌ Please fill in all fields.";
+      messageDiv.className = "message text-red-500";
+      return;
     }
 
-    function afterWindowLoaded() {
-      if (!window.ultra) {
-        showCustomToast("customToast", `
-          <strong class="block mb-1">⚠️ Ultra Wallet not found</strong>
-          <span>Please install from <a href="https://ultra.io/download" target="_blank" class="underline text-blue-400">ultra.io/download</a></span>
-        `);
-        return;
+    const maxPrice = `${parseFloat(maxPriceRaw).toFixed(8)} UOS`;
+
+    const action = {
+      account: "eosio.nft.ft",
+      name: "buy",
+      authorization: [{ actor: connectedAccount, permission: "active" }],
+      data: {
+        buyer: connectedAccount,
+        receiver: receiver,
+        token_id: parseInt(tokenId),
+        memo: "Buying via Ultra",
+        max_price: maxPrice,
+        promoter_id: "ultra"
       }
-      checkWallet();
-    }
+    };
 
-    async function checkWallet() {
-      try {
-        const response = await ultra.connect({ onlyIfTrusted: true });
-        connectedAccount = response.data.blockchainid;
-        localStorage.setItem('eagerlyConnection', 'true');
-        document.getElementById("accountInfo").innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
-      } catch {
-        localStorage.removeItem('eagerlyConnection');
-        document.getElementById("accountInfo").innerText = `🔌 Not connected`;
+    try {
+      const result = await ultra.signTransaction({ action });
+
+      messageDiv.textContent = "✅ Transaction submitted!";
+      messageDiv.className = "message text-green-600";
+      console.log(result);
+
+      // جلب بيانات NFT بعد الشراء (تأكد من صحة هذا الرابط مع Ultra)
+      const metaResponse = await fetch(`https://explorer.ultra.io/api/v1/token/${tokenId}`);
+      const meta = await metaResponse.json();
+
+      if (meta?.data) {
+        const nft = meta.data;
+        nftDiv.innerHTML = `
+          <h3>🎉 NFT Purchased!</h3>
+          <p><strong>Name:</strong> ${nft.name || "Unnamed NFT"}</p>
+          <img src="${nft.image_url || nft.image || ''}" alt="NFT Image" />
+        `;
+      } else {
+        nftDiv.innerHTML = `<p>✅ NFT bought, but no metadata found.</p>`;
       }
+
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
+      messageDiv.className = "message text-red-500";
+      nftDiv.innerHTML = "";
     }
+  }
+</script>
 
-    async function loginWallet() {
-      try {
-        const response = await ultra.connect({ referralCode: 'ecd1f052-9d0d-4b84-8dd3-10a753d044b5' });
-        connectedAccount = response.data.blockchainid;
-        localStorage.setItem('eagerlyConnection', 'true');
-        document.getElementById("accountInfo").innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
-        showCustomToast("customToast", `<strong>🔐 Wallet Connected</strong><br>${connectedAccount}`);
-      } catch (err) {
-        showCustomToast("customToast", `<strong>❌ Error:</strong> ${err.message || "Could not connect"}`);
-      }
-    }
-
-    async function buyNFT() {
-      const tokenId = document.getElementById("tokenId").value;
-      const maxPrice = document.getElementById("maxPrice").value;
-      const receiver = document.getElementById("receiver").value;
-      const messageDiv = document.getElementById("message");
-      const nftDiv = document.getElementById("nftDetails");
-
-      if (!window.ultra) return showCustomToast("customToast", "❌ Ultra Extension not detected.");
-      if (!connectedAccount) return showCustomToast("customToast", "⚠️ Please connect your wallet.");
-
-      const action = {
-        account: "eosio.nft.ft",
-        name: "buy",
-        authorization: [{ actor: connectedAccount, permission: "active" }],
-        data: {
-          buyer: connectedAccount,
-          receiver: receiver,
-          token_id: parseInt(tokenId),
-          memo: "Buying via Ultra",
-          max_price: maxPrice,
-          promoter_id: "ultra"
-        },
-      };
-
-      try {
-        const result = await ultra.signTransaction({ action });
-        messageDiv.textContent = "✅ Transaction submitted!";
-        messageDiv.className = "message text-green-600";
-        console.log(result);
-
-        // Fetch NFT metadata after success (example endpoint, change if needed)
-        const metaResponse = await fetch(`https://explorer.ultra.io/api/v1/token/${tokenId}`);
-        const meta = await metaResponse.json();
-
-        if (meta && meta.data) {
-          nftDiv.innerHTML = `
-            <h3>🎉 NFT Purchased!</h3>
-            <p><strong>Name:</strong> ${meta.data.name || "Unnamed NFT"}</p>
-            <img src="${meta.data.image_url || meta.data.image || ''}" alt="NFT Image" />
-          `;
-        } else {
-          nftDiv.innerHTML = `<p>✅ NFT bought, but no metadata found.</p>`;
-        }
-
-      } catch (error) {
-        console.error("Transaction failed:", error);
-        messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
-        messageDiv.className = "message text-red-500";
-        nftDiv.innerHTML = "";
-      }
-    }
-
-    if (document.readyState !== 'complete') {
-      window.addEventListener('load', afterWindowLoaded);
-    } else {
-      afterWindowLoaded();
-    }
-  </script>
 
 </body>
 </html>
