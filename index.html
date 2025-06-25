@@ -175,11 +175,12 @@ const formattedPrice = `${parseFloat(cleanPrice).toFixed(8)} UOS`;
 
   console.log("💰 Formatted price:", formattedPrice);
 
-  const action = {
-    account: "eosio.nft.ft",
-    name: "buy",
-    authorization: [{ actor: connectedAccount, permission: "active" }],
-    data: {
+const action = {
+  account: "eosio.nft.ft",
+  name: "buy",
+  authorization: [{ actor: connectedAccount, permission: "active" }],
+  data: {
+    buy: {
       buyer: connectedAccount,
       receiver: receiver,
       token_id: parseInt(tokenId),
@@ -187,7 +188,9 @@ const formattedPrice = `${parseFloat(cleanPrice).toFixed(8)} UOS`;
       max_price: formattedPrice,
       promoter_id: "ultra"
     }
-  };
+  }
+};
+
 
   console.log("📦 Prepared action:", action);
 
