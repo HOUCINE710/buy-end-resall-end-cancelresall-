@@ -84,9 +84,9 @@
     <button onclick="loginWallet()" style="margin-top:10px;">🔐 Connect Wallet</button>
 
     <input type="number" id="tokenId" placeholder="Token ID" required />
-    <input type="text" id="maxPrice" placeholder="Max Price (e.g. 2.00000000 UOS)" required />
+    <input type="text" id="maxPrice" placeholder="Max Price (e.g. 2.00000000)" required />
     <input type="text" id="receiver" placeholder="Receiver Account" required />
-    
+
     <button onclick="buyNFT()">🛒 Buy</button>
 
     <div id="message" class="message"></div>
@@ -111,8 +111,8 @@
     function afterWindowLoaded() {
       if (!window.ultra) {
         showCustomToast("customToast", `
-          <strong class="block mb-1">⚠️ Ultra Wallet not found</strong>
-          <span>Please install from <a href="https://ultra.io/download" target="_blank" class="underline text-blue-400">ultra.io/download</a></span>
+          <strong>⚠️ Ultra Wallet not found</strong>
+          <span>Please install from <a href="https://ultra.io/download" target="_blank">ultra.io/download</a></span>
         `);
         return;
       }
@@ -144,14 +144,19 @@
     }
 
     async function buyNFT() {
-      const tokenId = document.getElementById("tokenId").value;
-      const maxPrice = document.getElementById("maxPrice").value;
-      const receiver = document.getElementById("receiver").value;
+      const tokenId = document.getElementById("tokenId").value.trim();
+      const maxPriceInput = document.getElementById("maxPrice").value.trim();
+      const receiver = document.getElementById("receiver").value.trim();
       const messageDiv = document.getElementById("message");
       const nftDiv = document.getElementById("nftDetails");
 
       if (!window.ultra) return showCustomToast("customToast", "❌ Ultra Extension not detected.");
       if (!connectedAccount) return showCustomToast("customToast", "⚠️ Please connect your wallet.");
+      if (!tokenId || !maxPriceInput || !receiver) {
+        return showCustomToast("customToast", "⚠️ All fields are required.");
+      }
+
+      const formattedPrice = `${parseFloat(maxPriceInput).toFixed(8)} UOS`;
 
       const action = {
         account: "eosio.nft.ft",
@@ -162,18 +167,17 @@
           receiver: receiver,
           token_id: parseInt(tokenId),
           memo: "Buying via Ultra",
-          max_price: maxPrice,
+          max_price: formattedPrice,
           promoter_id: "ultra"
         },
       };
 
       try {
-       const result = await ultra.signTransaction({ actions: [action] });
+        const result = await ultra.signTransaction({ actions: [action] });
         messageDiv.textContent = "✅ Transaction submitted!";
         messageDiv.className = "message text-green-600";
         console.log(result);
 
-        // Fetch NFT metadata after success (example endpoint, change if needed)
         const metaResponse = await fetch(`https://explorer.ultra.io/api/v1/token/${tokenId}`);
         const meta = await metaResponse.json();
 
