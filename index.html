@@ -47,6 +47,15 @@
       font-weight: bold;
       text-align: center;
     }
+    .nft-display {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .nft-display img {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
     .toast {
       position: fixed;
       top: 20px;
@@ -81,6 +90,7 @@
     <button onclick="buyNFT()">🛒 Buy</button>
 
     <div id="message" class="message"></div>
+    <div id="nftDetails" class="nft-display"></div>
   </div>
 
   <div id="customToast" class="toast hidden"></div>
@@ -138,6 +148,7 @@
       const maxPrice = document.getElementById("maxPrice").value;
       const receiver = document.getElementById("receiver").value;
       const messageDiv = document.getElementById("message");
+      const nftDiv = document.getElementById("nftDetails");
 
       if (!window.ultra) return showCustomToast("customToast", "❌ Ultra Extension not detected.");
       if (!connectedAccount) return showCustomToast("customToast", "⚠️ Please connect your wallet.");
@@ -152,7 +163,7 @@
           token_id: parseInt(tokenId),
           memo: "Buying via Ultra",
           max_price: maxPrice,
-          promoter_id: "ultra"  // optional: change to your promoter
+          promoter_id: "ultra"
         },
       };
 
@@ -161,10 +172,26 @@
         messageDiv.textContent = "✅ Transaction submitted!";
         messageDiv.className = "message text-green-600";
         console.log(result);
+
+        // Fetch NFT metadata after success (example endpoint, change if needed)
+        const metaResponse = await fetch(`https://explorer.ultra.io/api/v1/token/${tokenId}`);
+        const meta = await metaResponse.json();
+
+        if (meta && meta.data) {
+          nftDiv.innerHTML = `
+            <h3>🎉 NFT Purchased!</h3>
+            <p><strong>Name:</strong> ${meta.data.name || "Unnamed NFT"}</p>
+            <img src="${meta.data.image_url || meta.data.image || ''}" alt="NFT Image" />
+          `;
+        } else {
+          nftDiv.innerHTML = `<p>✅ NFT bought, but no metadata found.</p>`;
+        }
+
       } catch (error) {
         console.error("Transaction failed:", error);
         messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
         messageDiv.className = "message text-red-500";
+        nftDiv.innerHTML = "";
       }
     }
 
