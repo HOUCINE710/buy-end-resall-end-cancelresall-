@@ -84,7 +84,7 @@
     <button onclick="loginWallet()" style="margin-top:10px;">🔐 Connect Wallet</button>
 
     <input type="number" id="tokenId" placeholder="Token ID" required />
-    <input type="text" id="maxPrice" placeholder="Max Price (e.g. 2.00000000)" required />
+    <input type="text" id="maxPrice" placeholder="Max Price (e.g. 4.00000000)" required />
     <input type="text" id="receiver" placeholder="Receiver Account" required />
 
     <button onclick="buyNFT()">🛒 Buy</button>
@@ -163,13 +163,15 @@
         name: "buy",
         authorization: [{ actor: connectedAccount, permission: "active" }],
         data: {
-          buyer: connectedAccount,
-          receiver: receiver,
-          token_id: parseInt(tokenId),
-          memo: "Buying via Ultra",
-          max_price: formattedPrice,
-          promoter_id: "ultra"
-        },
+          buy: {
+            buyer: connectedAccount,
+            receiver: receiver,
+            token_id: parseInt(tokenId),
+            memo: "Buying via Ultra",
+            max_price: formattedPrice,
+            promoter_id: "ultra"
+          }
+        }
       };
 
       try {
