@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buy NFT</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 400px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    input {
+      display: block;
+      margin-bottom: 15px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      background: #4CAF50;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .message {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      z-index: 999;
+      max-width: 300px;
+    }
+    .hidden { display: none; }
+    .slide-in-left { animation: slide-in 0.3s ease-out; }
+    @keyframes slide-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Buy NFT</h2>
+
+    <div id="accountInfo">🔌 Not connected</div>
+    <button onclick="loginWallet()" style="margin-top:10px;">🔐 Connect Wallet</button>
+
+    <input type="number" id="tokenId" placeholder="Token ID" required />
+    <input type="text" id="maxPrice" placeholder="Max Price (e.g. 2.00000000 UOS)" required />
+    <input type="text" id="receiver" placeholder="Receiver Account" required />
+    
+    <button onclick="buyNFT()">🛒 Buy</button>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <div id="customToast" class="toast hidden"></div>
+
+  <script>
+    let connectedAccount = null;
+
+    function showCustomToast(id, html) {
+      const toast = document.getElementById(id);
+      toast.innerHTML = html;
+      toast.classList.remove("hidden");
+      toast.classList.add("slide-in-left");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 5000);
+    }
+
+    function afterWindowLoaded() {
+      if (!window.ultra) {
+        showCustomToast("customToast", `
+          <strong class="block mb-1">⚠️ Ultra Wallet not found</strong>
+          <span>Please install from <a href="https://ultra.io/download" target="_blank" class="underline text-blue-400">ultra.io/download</a></span>
+        `);
+        return;
+      }
+      checkWallet();
+    }
+
+    async function checkWallet() {
+      try {
+        const response = await ultra.connect({ onlyIfTrusted: true });
+        connectedAccount = response.data.blockchainid;
+        localStorage.setItem('eagerlyConnection', 'true');
+        document.getElementById("accountInfo").innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
+      } catch {
+        localStorage.removeItem('eagerlyConnection');
+        document.getElementById("accountInfo").innerText = `🔌 Not connected`;
+      }
+    }
+
+    async function loginWallet() {
+      try {
+        const response = await ultra.connect({ referralCode: 'ecd1f052-9d0d-4b84-8dd3-10a753d044b5' });
+        connectedAccount = response.data.blockchainid;
+        localStorage.setItem('eagerlyConnection', 'true');
+        document.getElementById("accountInfo").innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
+        showCustomToast("customToast", `<strong>🔐 Wallet Connected</strong><br>${connectedAccount}`);
+      } catch (err) {
+        showCustomToast("customToast", `<strong>❌ Error:</strong> ${err.message || "Could not connect"}`);
+      }
+    }
+
+    async function buyNFT() {
+      const tokenId = document.getElementById("tokenId").value;
+      const maxPrice = document.getElementById("maxPrice").value;
+      const receiver = document.getElementById("receiver").value;
+      const messageDiv = document.getElementById("message");
+
+      if (!window.ultra) return showCustomToast("customToast", "❌ Ultra Extension not detected.");
+      if (!connectedAccount) return showCustomToast("customToast", "⚠️ Please connect your wallet.");
+
+      const action = {
+        account: "eosio.nft.ft",
+        name: "buy",
+        authorization: [{ actor: connectedAccount, permission: "active" }],
+        data: {
+          buyer: connectedAccount,
+          receiver: receiver,
+          token_id: parseInt(tokenId),
+          memo: "Buying via Ultra",
+          max_price: maxPrice,
+          promoter_id: "ultra"  // optional: change to your promoter
+        },
+      };
+
+      try {
+        const result = await ultra.signTransaction({ action });
+        messageDiv.textContent = "✅ Transaction submitted!";
+        messageDiv.className = "message text-green-600";
+        console.log(result);
+      } catch (error) {
+        console.error("Transaction failed:", error);
+        messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
+        messageDiv.className = "message text-red-500";
+      }
+    }
+
+    if (document.readyState !== 'complete') {
+      window.addEventListener('load', afterWindowLoaded);
+    } else {
+      afterWindowLoaded();
+    }
+  </script>
+
+</body>
+</html>
