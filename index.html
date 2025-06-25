@@ -170,7 +170,9 @@
     return;
   }
 
-  const formattedPrice = `${parseFloat(maxPriceInput).toFixed(8)} UOS`;
+ const cleanPrice = maxPriceInput.replace(/[^\d.]/g, ""); // يحذف أي شيء غير الأرقام والنقطة
+const formattedPrice = `${parseFloat(cleanPrice).toFixed(8)} UOS`;
+
   console.log("💰 Formatted price:", formattedPrice);
 
   const action = {
