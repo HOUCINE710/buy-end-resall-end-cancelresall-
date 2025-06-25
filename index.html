@@ -150,15 +150,28 @@
   const messageDiv = document.getElementById("message");
   const nftDiv = document.getElementById("nftDetails");
 
-  if (!window.ultra) return showCustomToast("customToast", "❌ Ultra Extension not detected.");
-  if (!connectedAccount) return showCustomToast("customToast", "⚠️ Please connect your wallet.");
-  if (!tokenId || !maxPriceInput || !receiver) {
-    return showCustomToast("customToast", "⚠️ All fields are required.");
+  console.log("🔍 Inputs:", { tokenId, maxPriceInput, receiver });
+
+  if (!window.ultra) {
+    showCustomToast("customToast", "❌ Ultra Extension not detected.");
+    console.log("❌ Ultra extension not found.");
+    return;
   }
 
-  // تحويل السعر إلى عدد صحيح يمثل smallest unit (مثل satoshis)
-  const amount = parseFloat(maxPriceInput) * 10 ** 8;
-  const formattedAmount = Math.floor(amount).toString();
+  if (!connectedAccount) {
+    showCustomToast("customToast", "⚠️ Please connect your wallet.");
+    console.log("⚠️ Wallet not connected.");
+    return;
+  }
+
+  if (!tokenId || !maxPriceInput || !receiver) {
+    showCustomToast("customToast", "⚠️ All fields are required.");
+    console.log("⚠️ Missing input values.");
+    return;
+  }
+
+  const formattedPrice = `${parseFloat(maxPriceInput).toFixed(8)} UOS`;
+  console.log("💰 Formatted price:", formattedPrice);
 
   const action = {
     account: "eosio.nft.ft",
@@ -169,24 +182,29 @@
       receiver: receiver,
       token_id: parseInt(tokenId),
       memo: "Buying via Ultra",
-      max_price: {
-        amount: formattedAmount,     // string, ex: "400000000"
-        symbol: "UOS",
-        precision: 8
-      },
+      max_price: formattedPrice,
       promoter_id: "ultra"
     }
   };
 
+  console.log("📦 Prepared action:", action);
+
   try {
-    const result = await ultra.signTransaction({ actions: [action] });
+    console.log("🚀 Sending transaction...");
+    const result = await ultra.signTransaction(
+      { actions: [action] },
+      { blocksBehind: 3, expireSeconds: 30 }
+    );
+
+    console.log("✅ Transaction success:", result);
 
     messageDiv.textContent = "✅ Transaction submitted!";
     messageDiv.className = "message text-green-600";
-    console.log(result);
 
     const metaResponse = await fetch(`https://explorer.ultra.io/api/v1/token/${tokenId}`);
     const meta = await metaResponse.json();
+
+    console.log("🖼️ NFT Metadata response:", meta);
 
     if (meta && meta.data) {
       nftDiv.innerHTML = `
@@ -199,7 +217,7 @@
     }
 
   } catch (error) {
-    console.error("Transaction failed:", error);
+    console.error("❌ Transaction failed:", error);
     messageDiv.textContent = `❌ Error: ${error.message || "Transaction failed."}`;
     messageDiv.className = "message text-red-500";
     nftDiv.innerHTML = "";
