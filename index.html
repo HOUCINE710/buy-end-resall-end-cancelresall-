@@ -168,7 +168,7 @@
       };
 
       try {
-        const result = await ultra.signTransaction({ action });
+       const result = await ultra.signTransaction({ actions: [action] });
         messageDiv.textContent = "✅ Transaction submitted!";
         messageDiv.className = "message text-green-600";
         console.log(result);
