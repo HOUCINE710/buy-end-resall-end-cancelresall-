@@ -325,21 +325,26 @@
     setTimeout(() => toast.classList.add("hidden"), 5000);
   }
 
-  async function loginWallet() {
-    console.log("🔐 Attempting to connect wallet...");
-    try {
-      const response = await ultra.connect({ referralCode: 'ecd1f052-9d0d-4b84-8dd3-10a753d044b5' });
-      console.log("✅ Wallet connected response:", response);
-      connectedAccount = response.data.blockchainid;
-      const accountInfo = document.getElementById("accountInfo");
-      accountInfo.innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
-      accountInfo.classList.add('connected');
-      showCustomToast("customToast", `<strong>🔐 Wallet Connected</strong><br>${connectedAccount}`);
-    } catch (err) {
-      console.error("❌ Wallet connection error:", err);
-      showCustomToast("customToast", `<strong>❌ Error:</strong> ${err.message || "Could not connect"}`);
-    }
+async function loginWallet() {
+  console.log("🔐 Attempting to connect wallet...");
+  try {
+    const response = await ultra.connect({ referralCode: 'ecd1f052-9d0d-4b84-8dd3-10a753d044b5' });
+    console.log("✅ Wallet connected response:", response);
+
+    connectedAccount = response.data.blockchainid;
+    localStorage.setItem('eagerlyConnection', 'true'); // ✅ تخزين الاتصال فقط بعد الضغط
+
+    const accountInfo = document.getElementById("accountInfo");
+    accountInfo.innerHTML = `✅ Connected: <strong>${connectedAccount}</strong>`;
+    accountInfo.classList.add('connected');
+
+    showCustomToast("customToast", `<strong>🔐 Wallet Connected</strong><br>${connectedAccount}`);
+  } catch (err) {
+    console.error("❌ Wallet connection error:", err);
+    showCustomToast("customToast", `<strong>❌ Error:</strong> ${err.message || "Could not connect"}`);
   }
+}
+
 
   async function buyNFT() {
     console.log("🛒 Starting NFT purchase...");
@@ -372,7 +377,8 @@
     const action = {
       contract: "eosio.nft.ft",
       action: "buy",
-      authorization: [{ actor: connectedAccount, permission: "active" }],
+      authorization: [{ actor: response.data.blockchainid, permission: "active" }],
+
       data: {
         buy: {
           buyer: connectedAccount,
@@ -460,7 +466,8 @@
     const action = {
       contract: "eosio.nft.ft",
       action: "resell",
-      authorization: [{ actor: connectedAccount, permission: "active" }],
+      authorization: [{ actor: response.data.blockchainid, permission: "active" }],
+
       data: {
         seller: connectedAccount,
         token_id: parseInt(tokenId),
@@ -514,7 +521,8 @@
     const action = {
       contract: "eosio.nft.ft",
       action: "cancelresell",
-      authorization: [{ actor: connectedAccount, permission: "active" }],
+      authorization: [{ actor: response.data.blockchainid, permission: "active" }],
+
       data: {
         cancelresell: {
           token_id: parseInt(tokenId),
@@ -546,7 +554,7 @@
     console.log("🌐 Page loaded.");
     if (localStorage.getItem('eagerlyConnection')) {
       console.log("🔄 Auto-connect enabled.");
-      loginWallet();
+      //loginWallet();
     } else {
       console.log("🛑 No previous wallet connection found.");
     }
