@@ -377,7 +377,7 @@ async function loginWallet() {
     const action = {
       contract: "eosio.nft.ft",
       action: "buy",
-     authorization: [connectedAccount],
+     authorization: [{ actor: connectedAccount, permission: "active" }],
 
       data: {
         buy: {
