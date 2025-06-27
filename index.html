@@ -374,22 +374,20 @@ async function loginWallet() {
     const formattedPrice = `${parseFloat(maxPriceInput).toFixed(8)} UOS`;
     console.log("💰 Formatted price:", formattedPrice);
 
-    const action = {
-      contract: "eosio.nft.ft",
-      action: "buy",
-     authorization: [{ actor: connectedAccount, permission: "active" }],
-
-      data: {
-        buy: {
-          buyer: connectedAccount,
-          receiver: receiver,
-          token_id: parseInt(tokenId),
-          memo: "Buying via Ultra",
-          max_price: formattedPrice,
-          promoter_id: "ultra"
-        }
-      }
-    };
+  const action = {
+  contract: "eosio.nft.ft",
+  action: "buy",
+  authorization: [{ actor: connectedAccount, permission: "active" }],
+  data: {
+    buyer: connectedAccount,
+    receiver: receiver,
+    token_id: parseInt(tokenId),
+    memo: "Buying via Ultra",
+    max_price: formattedPrice,
+    promoter_id: "ultra"
+  }
+};
+;
 
     console.log("🚀 Transaction action object:", action);
 
