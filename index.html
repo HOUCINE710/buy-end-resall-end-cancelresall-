@@ -370,8 +370,8 @@
     console.log("💰 Formatted price:", formattedPrice);
 
     const action = {
-      account: "eosio.nft.ft",
-      name: "buy",
+      contract: "eosio.nft.ft",
+      action: "buy",
       authorization: [{ actor: connectedAccount, permission: "active" }],
       data: {
         buy: {
@@ -458,8 +458,8 @@
     console.log("💰 Resell price:", formattedPrice);
 
     const action = {
-      account: "eosio.nft.ft",
-      name: "resell",
+      contract: "eosio.nft.ft",
+      action: "resell",
       authorization: [{ actor: connectedAccount, permission: "active" }],
       data: {
         seller: connectedAccount,
@@ -512,8 +512,8 @@
     }
 
     const action = {
-      account: "eosio.nft.ft",
-      name: "cancelresell",
+      contract: "eosio.nft.ft",
+      action: "cancelresell",
       authorization: [{ actor: connectedAccount, permission: "active" }],
       data: {
         cancelresell: {
