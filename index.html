@@ -377,7 +377,7 @@ async function loginWallet() {
     const action = {
       contract: "eosio.nft.ft",
       action: "buy",
-      authorization: [{ actor: response.data.blockchainid, permission: "active" }],
+     authorization: [{ actor: connectedAccount, permission: "active" }],
 
       data: {
         buy: {
@@ -466,7 +466,8 @@ async function loginWallet() {
     const action = {
       contract: "eosio.nft.ft",
       action: "resell",
-      authorization: [{ actor: response.data.blockchainid, permission: "active" }],
+      authorization: [{ actor: connectedAccount, permission: "active" }],
+
 
       data: {
         seller: connectedAccount,
@@ -521,7 +522,8 @@ async function loginWallet() {
     const action = {
       contract: "eosio.nft.ft",
       action: "cancelresell",
-      authorization: [{ actor: response.data.blockchainid, permission: "active" }],
+     authorization: [{ actor: connectedAccount, permission: "active" }],
+
 
       data: {
         cancelresell: {
